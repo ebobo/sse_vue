@@ -1,8 +1,8 @@
 <template>
   <h2>{{ msg }}</h2>
   <p>
-    <button class="button">Subscribe SSE</button>
-    <button class="button">Unsubscribe</button>
+    <button class="button" @click="connectSSE">Subscribe SSE</button>
+    <button class="button" @click="disconnectSSE">Unsubscribe</button>
   </p>
 </template>
 
@@ -18,7 +18,20 @@ export default {
     },
   },
 
-  methods: {},
+  methods: {
+    connectSSE() {
+      console.log('connect sse');
+      const evtSource = new EventSource('http://localhost:5005/stream');
+
+      evtSource.onmessage = function (event) {
+        console.log(event.data);
+      };
+    },
+
+    disconnectSSE() {
+      console.log('disconnect sse');
+    },
+  },
 };
 
 const count = ref(0);
