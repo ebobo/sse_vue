@@ -10,6 +10,13 @@
 import { ref } from 'vue';
 
 export default {
+  data(): {
+    event_source: EventSource | null;
+  } {
+    return {
+      event_source: null,
+    };
+  },
   props: {
     msg: {
       required: true,
@@ -21,15 +28,16 @@ export default {
   methods: {
     connectSSE() {
       console.log('connect sse');
-      const evtSource = new EventSource('http://localhost:5005/stream');
+      this.event_source = new EventSource('http://localhost:5005/stream');
 
-      evtSource.onmessage = function (event) {
+      this.event_source.onmessage = function (event) {
         console.log(event.data);
       };
     },
 
     disconnectSSE() {
       console.log('disconnect sse');
+      this.event_source.close();
     },
   },
 };
