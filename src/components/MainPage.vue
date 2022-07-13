@@ -1,20 +1,40 @@
 <template>
   <h2>{{ msg }}</h2>
+  <h4>client ID: {{ sse_client_id }}</h4>
   <p>
-    <button class="button" @click="connectSSE">Subscribe SSE</button>
+    <button
+      class="button"
+      :disabled="event_source !== null"
+      @click="connectSSE"
+    >
+      Subscribe SSE
+    </button>
     <button class="button" @click="disconnectSSE">Unsubscribe</button>
   </p>
+  <li v-for="(m, index) in messages" :key="index">
+    {{ index }} - {{ m.type }} - {{ m.unitId }} -{{ m.system }}
+  </li>
 </template>
 
 <script lang="ts">
 import { ref } from 'vue';
 
+interface systemMessage {
+  unitId: string;
+  type: string;
+  system: string;
+}
+
 export default {
   data(): {
     event_source: EventSource | null;
+    sse_client_id: Number;
+    messages: systemMessage[];
   } {
     return {
       event_source: null,
+      sse_client_id: 0,
+      messages: [],
     };
   },
   props: {
@@ -27,17 +47,26 @@ export default {
 
   methods: {
     connectSSE() {
-      console.log('connect sse');
-      this.event_source = new EventSource('http://localhost:5005/stream');
+      if (this.event_source === null) {
+        this.event_source = new EventSource('http://localhost:5005/stream');
 
-      this.event_source.onmessage = function (event) {
-        console.log(event.data);
-      };
+        console.log(this.event_source);
+        this.event_source.onmessage = (event: MessageEvent) => {
+          const data = JSON.parse(event.data);
+          // console.log(data.length);
+
+          this.messages = this.messages.concat(JSON.parse(event.data));
+          // console.log(event.data);
+        };
+      }
     },
 
     disconnectSSE() {
-      console.log('disconnect sse');
-      this.event_source.close();
+      if (this.event_source !== null) {
+        this.event_source.close();
+        this.messages = [];
+        this.event_source = null;
+      }
     },
   },
 };

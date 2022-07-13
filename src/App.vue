@@ -6,7 +6,7 @@ import MainPage from './components/MainPage.vue';
 
 <template>
   <img alt="Vue logo" class="logo" src="./assets/icon/panda_icon.svg" />
-  <MainPage msg="server sent event NodeJS + Vue3" />
+  <main-page msg="server sent event NodeJS + Vue3" />
 </template>
 
 <style>
@@ -19,6 +19,6 @@ import MainPage from './components/MainPage.vue';
   margin-top: 60px;
 }
 .logo {
-  width: 40vw;
+  width: 20vw;
 }
 </style>
