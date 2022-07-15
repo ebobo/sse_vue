@@ -12,7 +12,7 @@
     <button class="button" @click="disconnectSSE">Unsubscribe</button>
   </p>
   <li v-for="(m, index) in messages" :key="index">
-    {{ index }} - {{ m.type }} - {{ m.unitId }} -{{ m.system }}
+    {{ index }} - {{ m.type }} - {{ m.unitId }} -{{ m.system }} - {{ m.time }}
   </li>
 </template>
 
@@ -50,14 +50,28 @@ export default {
       if (this.event_source === null) {
         this.event_source = new EventSource('http://localhost:5005/stream');
 
-        console.log(this.event_source);
-        this.event_source.onmessage = (event: MessageEvent) => {
-          const data = JSON.parse(event.data);
-          // console.log(data.length);
+        // console.log(this.event_source);
 
-          this.messages = this.messages.concat(JSON.parse(event.data));
-          // console.log(event.data);
-        };
+        this.event_source.addEventListener('clear', (event) => {
+          const data = event.data;
+          console.log(data);
+          if (data === 'all') {
+            this.messages = [];
+          }
+        });
+
+        this.event_source.addEventListener('message', (event: MessageEvent) => {
+          const data = JSON.parse(event.data);
+          this.messages = this.messages.concat(data);
+        });
+
+        // this.event_source.onmessage = (event: MessageEvent) => {
+        //   const data = JSON.parse(event.data);
+        //   // console.log(data.length);
+        //   console.log(event);
+        //   this.messages = this.messages.concat(data);
+        //   // console.log(event.data);
+        // };
       }
     },
 
