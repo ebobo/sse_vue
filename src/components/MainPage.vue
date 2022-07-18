@@ -11,9 +11,34 @@
     </button>
     <button class="button" @click="disconnectSSE">Unsubscribe</button>
   </p>
-  <li v-for="(m, index) in messages" :key="index">
-    {{ index }} - {{ m.type }} - {{ m.unitId }} -{{ m.system }} - {{ m.time }}
-  </li>
+  <div class="Total">
+    <label>Total Events:</label>
+    <label>{{ messages.length }}</label>
+  </div>
+  <div>
+    <table class="table">
+      <tr>
+        <th>Index</th>
+        <th>State</th>
+        <th>UnitID</th>
+        <th>System</th>
+        <th>Timestamp</th>
+        <th>Acknowledged</th>
+      </tr>
+      <tr v-for="(m, index) in messages" :key="index">
+        <td>{{ index + 1 }}</td>
+        <td>{{ m.Type }}</td>
+        <td>{{ m.UnitId }}</td>
+        <td>{{ m.System }}</td>
+        <td>{{ m.Timestamp }}</td>
+        <td>{{ m.Acknowledged ? 'Acked' : 'Unacked' }}</td>
+      </tr>
+    </table>
+  </div>
+  <!-- <li v-for="(m, index) in messages" :key="index">
+    {{ index + 1 }} - {{ m.Type }} - {{ m.UnitId }} -{{ m.System }} -
+    {{ m.Timestamp }} - {{ m.Acknowledged ? 'Acked' : 'Unacked' }}
+  </li> -->
 </template>
 
 <script lang="ts">
@@ -99,6 +124,17 @@ a {
 label {
   margin: 0 0.5em;
   font-weight: bold;
+}
+
+table {
+  margin: auto;
+  width: 60%;
+  border: 3px solid #73ad21;
+  border-collapse: collapse;
+}
+td,
+th {
+  border: 1px solid #73ad21;
 }
 
 code {
