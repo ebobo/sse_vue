@@ -20,18 +20,18 @@
       <tr>
         <th>Index</th>
         <th>State</th>
-        <th>UnitID</th>
-        <th>System</th>
+        <th>Name</th>
+        <th>Description</th>
         <th>Timestamp</th>
-        <th>Acknowledged</th>
+        <th>Deleted</th>
       </tr>
       <tr v-for="(m, index) in messages" :key="index">
         <td>{{ index + 1 }}</td>
-        <td>{{ m.Type }}</td>
-        <td>{{ m.UnitId }}</td>
-        <td>{{ m.System }}</td>
-        <td>{{ m.Timestamp }}</td>
-        <td>{{ m.Acknowledged ? 'Acked' : 'Unacked' }}</td>
+        <td>{{ m.type }}</td>
+        <td>{{ m.name }}</td>
+        <td>{{ m.description }}</td>
+        <td>{{ m.timestamp }}</td>
+        <td>{{ m.deleted ? 'Deleted' : 'Active' }}</td>
       </tr>
     </table>
   </div>
@@ -45,9 +45,12 @@
 import { ref } from 'vue';
 
 interface systemMessage {
-  unitId: string;
+  name: string;
+  description: string;
   type: string;
-  system: string;
+  timestamp: string;
+  quality: string;
+  deleted: boolean;
 }
 
 export default {
@@ -73,7 +76,7 @@ export default {
   methods: {
     connectSSE() {
       if (this.event_source === null) {
-        this.event_source = new EventSource('http://localhost:5005/stream');
+        this.event_source = new EventSource('http://172.16.1.67:5000/sse/feed');
 
         // console.log(this.event_source);
 
@@ -85,9 +88,22 @@ export default {
           }
         });
 
-        this.event_source.addEventListener('message', (event: MessageEvent) => {
+        this.event_source.addEventListener('frakon', (event) => {
           const data = JSON.parse(event.data);
-          this.messages = this.messages.concat(data);
+          if (data.meta.codec !== 'alarmMsg') {
+            return;
+          }
+          const system_message = {
+            name: data.message.name,
+            description: data.message.description[0].text,
+            type: data.meta.type,
+            timestamp: data.message.time,
+            quality: data.meta.quality,
+            deleted: data.meta.deleted,
+          };
+
+          console.log(system_message);
+          this.messages = this.messages.concat(system_message);
         });
 
         // this.event_source.onmessage = (event: MessageEvent) => {
