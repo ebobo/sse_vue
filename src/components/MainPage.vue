@@ -10,6 +10,9 @@
       Subscribe SSE
     </button>
     <button class="button" @click="disconnectSSE">Unsubscribe</button>
+    <button class="button" @click="$emit('change-avatar')">
+      Change Avatar
+    </button>
   </p>
   <div class="Total">
     <label>Total Events:</label>
@@ -25,14 +28,14 @@
         <th>Timestamp</th>
         <th>Acknowledged</th>
       </tr>
-      <tr v-for="(m, index) in messages" :key="index">
+      <!-- <tr v-for="(m, index) in messages" :key="index">
         <td>{{ index + 1 }}</td>
         <td>{{ m.Type }}</td>
         <td>{{ m.UnitId }}</td>
         <td>{{ m.System }}</td>
         <td>{{ m.Timestamp }}</td>
         <td>{{ m.Acknowledged ? 'Acked' : 'Unacked' }}</td>
-      </tr>
+      </tr> -->
     </table>
   </div>
   <!-- <li v-for="(m, index) in messages" :key="index">
@@ -51,15 +54,18 @@ interface systemMessage {
 }
 
 export default {
+  emits: ['change-avatar'],
   data(): {
     event_source: EventSource | null;
     sse_client_id: Number;
     messages: systemMessage[];
+    sse_worker: Worker | null;
   } {
     return {
       event_source: null,
       sse_client_id: 0,
       messages: [],
+      sse_worker: null,
     };
   },
   props: {
@@ -70,14 +76,20 @@ export default {
     },
   },
 
+  mounted() {
+    this.sse_worker = new Worker('/src/workers/sworker.ts');
+  },
+
   methods: {
-    connectSSE() {
+    connectSSE(): void {
       if (this.event_source === null) {
         this.event_source = new EventSource('http://localhost:5005/stream');
 
-        // console.log(this.event_source);
+        if (this.sse_worker) {
+          this.sse_worker.postMessage('Hello, worker');
+        }
 
-        this.event_source.addEventListener('clear', (event) => {
+        this.event_source.addEventListener('clear', (event: MessageEvent) => {
           const data = event.data;
           console.log(data);
           if (data === 'all') {
@@ -87,6 +99,7 @@ export default {
 
         this.event_source.addEventListener('message', (event: MessageEvent) => {
           const data = JSON.parse(event.data);
+          console.log('data come in');
           this.messages = this.messages.concat(data);
         });
 
@@ -107,6 +120,10 @@ export default {
         this.event_source = null;
       }
     },
+
+    changeAvatar() {
+      console.log('change avatar');
+    },
   },
 };
 
@@ -117,6 +134,10 @@ const count = ref(0);
 a {
   color: #42b983;
 }
+.button-main {
+  display: block;
+}
+
 .button {
   margin-left: 10px;
 }

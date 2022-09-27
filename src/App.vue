@@ -1,13 +1,59 @@
-<script setup lang="ts">
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import MainPage from './components/MainPage.vue';
-</script>
-
 <template>
-  <img alt="Vue logo" class="logo" src="./assets/icon/panda_icon.svg" />
-  <main-page msg="server sent event NodeJS + Vue3" />
+  <img alt="Vue logo" class="logo" :src="iconPath" />
+  <main-page
+    msg="server sent event NodeJS + Vue3"
+    @change-avatar="changeIcon"
+  />
 </template>
+
+<script lang="ts">
+import { defineComponent } from 'vue';
+import MainPage from './components/MainPage.vue';
+
+export default defineComponent({
+  name: 'App',
+
+  components: {
+    MainPage,
+  },
+
+  data() {
+    return {
+      iconIndex: 0,
+      iconArray: [
+        'bird',
+        'cow',
+        'dog',
+        'duck',
+        'elephant',
+        'giraffe',
+        'mouse',
+        'owl',
+        'panda',
+        'tigre',
+        'turtle',
+        'zebra',
+      ],
+    };
+  },
+
+  methods: {
+    changeIcon() {
+      if (this.iconIndex < this.iconArray.length - 1) {
+        this.iconIndex++;
+      } else {
+        this.iconIndex = 0;
+      }
+    },
+  },
+
+  computed: {
+    iconPath(): string {
+      return './src/assets/icon/' + this.iconArray[this.iconIndex] + '.svg';
+    },
+  },
+});
+</script>
 
 <style>
 #app {
