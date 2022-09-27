@@ -28,14 +28,14 @@
         <th>Timestamp</th>
         <th>Acknowledged</th>
       </tr>
-      <!-- <tr v-for="(m, index) in messages" :key="index">
+      <tr v-for="(m, index) in messages" :key="index">
         <td>{{ index + 1 }}</td>
         <td>{{ m.Type }}</td>
         <td>{{ m.UnitId }}</td>
         <td>{{ m.System }}</td>
         <td>{{ m.Timestamp }}</td>
         <td>{{ m.Acknowledged ? 'Acked' : 'Unacked' }}</td>
-      </tr> -->
+      </tr>
     </table>
   </div>
   <!-- <li v-for="(m, index) in messages" :key="index">
@@ -59,13 +59,11 @@ export default {
     event_source: EventSource | null;
     sse_client_id: Number;
     messages: systemMessage[];
-    sse_worker: Worker | null;
   } {
     return {
       event_source: null,
       sse_client_id: 0,
       messages: [],
-      sse_worker: null,
     };
   },
   props: {
@@ -78,46 +76,28 @@ export default {
 
   mounted() {
     this.sse_worker = new Worker('/src/workers/sworker.ts');
+    this.sse_worker.onmessage = this.onWorkerMessage;
   },
 
   methods: {
     connectSSE(): void {
-      if (this.event_source === null) {
-        this.event_source = new EventSource('http://localhost:5005/stream');
-
-        if (this.sse_worker) {
-          this.sse_worker.postMessage('Hello, worker');
-        }
-
-        this.event_source.addEventListener('clear', (event: MessageEvent) => {
-          const data = event.data;
-          console.log(data);
-          if (data === 'all') {
-            this.messages = [];
-          }
-        });
-
-        this.event_source.addEventListener('message', (event: MessageEvent) => {
-          const data = JSON.parse(event.data);
-          console.log('data come in');
-          this.messages = this.messages.concat(data);
-        });
-
-        // this.event_source.onmessage = (event: MessageEvent) => {
-        //   const data = JSON.parse(event.data);
-        //   // console.log(data.length);
-        //   console.log(event);
-        //   this.messages = this.messages.concat(data);
-        //   // console.log(event.data);
-        // };
+      if (this.sse_worker) {
+        this.sse_worker.postMessage('connect');
       }
     },
 
     disconnectSSE() {
-      if (this.event_source !== null) {
-        this.event_source.close();
+      this.messages = [];
+      if (this.sse_worker) {
+        this.sse_worker.postMessage('disconnect');
+      }
+    },
+
+    onWorkerMessage(message: any) {
+      if (message.data.command === 'clear') {
         this.messages = [];
-        this.event_source = null;
+      } else if (message.data.command === 'message') {
+        this.messages = this.messages.concat(message.data.messages);
       }
     },
 
