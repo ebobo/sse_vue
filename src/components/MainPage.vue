@@ -22,19 +22,25 @@
     <table class="table">
       <tr>
         <th>Index</th>
-        <th>State</th>
-        <th>UnitID</th>
-        <th>System</th>
+        <th>Type</th>
+        <th>Tag</th>
+        <th>Name</th>
         <th>Timestamp</th>
         <th>Acknowledged</th>
       </tr>
       <tr v-for="(m, index) in messages" :key="index">
         <td>{{ index + 1 }}</td>
-        <td>{{ m.Type }}</td>
-        <td>{{ m.UnitId }}</td>
-        <td>{{ m.System }}</td>
-        <td>{{ m.Timestamp }}</td>
-        <td>{{ m.Acknowledged ? 'Acked' : 'Unacked' }}</td>
+        <td>{{ m.meta.type }}</td>
+        <td>{{ m.message.tag }}</td>
+        <td>{{ m.message.name }}</td>
+        <td>
+          {{
+            new Date(m.message.time).toLocaleString('en-GB', {
+              hour12: false,
+            })
+          }}
+        </td>
+        <td>{{ m.message.value[0].ack.state ? 'Acked' : 'Unacked' }}</td>
       </tr>
     </table>
   </div>

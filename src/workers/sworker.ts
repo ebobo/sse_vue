@@ -15,7 +15,7 @@ self.onmessage = (message) => {
     interval === null
   ) {
     console.log('connect');
-    event_source = new EventSource('http://localhost:5005/stream');
+    event_source = new EventSource('http://localhost:5005/sse/feed');
 
     event_source.addEventListener('clear', (event: MessageEvent) => {
       const data = event.data;
@@ -26,8 +26,9 @@ self.onmessage = (message) => {
       self.postMessage({ command: 'clear' });
     });
 
-    event_source.addEventListener('message', (event: MessageEvent) => {
+    event_source.addEventListener('frakon', (event: MessageEvent) => {
       const data = JSON.parse(event.data);
+      console.log(data);
       messages = messages.concat(data);
     });
 
